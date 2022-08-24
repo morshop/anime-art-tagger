@@ -1,6 +1,7 @@
-# sagger - simple anime girl tagger
+# anime art tagger
 
-a POC for an anime girl image tagger - a neural network with an EfficientNetB4 base.
+POC for a multi-label classifier for anime-style art,  
+using a neural network with an EfficientNetB4 base.
 
 ## data
 
