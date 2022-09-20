@@ -44,7 +44,7 @@ def lbls2proba(labels):
 
 
 preprocess = T.Compose([
-    T.Resize(224),
+    T.Resize(384),
     T.ToTensor(),
     T.Normalize(
         mean=[0.485, 0.456, 0.406],

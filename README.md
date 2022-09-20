@@ -1,8 +1,8 @@
 ## changelog:
-### 2022/09/18
+### 2022/09/20
 - pytorch and torchvision version updates
 - model updated from EfficientNetB4 to EfficientNetV2S
-- overall results dropped a little (50.6% -> 49.2% F1)
+- overall results improved (50.6% -> 52.1% F1)
 - training time was shortened by a whole lot (10 hr diff)
 
 ------
@@ -42,7 +42,7 @@ testing was done locally and is presented in `model/test_nn.ipynb`.
 
 ## results
 
-the model yielded an F1 score of 49.2% for a probability threshold of 35%, which is alright for such an early stage.  
+the model yielded an F1 score of 52.1% for a probability threshold of 35%, which is alright for such an early stage.  
 `showcase.ipynb` presents the current results, including unsupervised inference for 4 pics.
 
 ## plans
