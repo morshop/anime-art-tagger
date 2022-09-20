@@ -12,10 +12,8 @@ from torch.nn import functional as F
 from torch import optim
 from torch.utils.data import Dataset, DataLoader, Subset
 
-import torchvision
 from torchvision import transforms as T
-
-from torchinfo import summary
+from torchvision.models import efficientnet_v2_s, EfficientNet_V2_S_Weights
 
 dev = torch.device(('cpu', 'cuda')[torch.cuda.is_available()])
 
@@ -40,9 +38,10 @@ label_converter = pd.read_csv(top_path).squeeze()
 
 def lbls2proba(labels):
     return torch.FloatTensor(label_converter.apply(
-            lambda name:.9 if name in labels else .1))
+            lambda name: .9 if name in labels else .1))
 
 # images
+
 
 preprocess = T.Compose([
     T.Resize(224),
@@ -54,12 +53,13 @@ preprocess = T.Compose([
 
 # ds class
 
+
 class DanbooruDataset(Dataset):
 
     def __init__(self, label_data, img_dir,
                  transform=preprocess,
                  target_transform=lbls2proba):
-        
+
         self.label_data = label_data
         self.img_dir = img_dir
         self.transform = transform
@@ -71,7 +71,7 @@ class DanbooruDataset(Dataset):
     def __getitem__(self, idx):
         img_id = self.label_data.iloc[idx, 0]
         img_path = Path(self.img_dir) / f'{img_id}.jpg'
-        image = self.transform(Image.open(img_path).convert('RGB'))        
+        image = self.transform(Image.open(img_path).convert('RGB'))
         labels = self.target_transform(self.label_data.iloc[idx, 1])
         return image.to(dev), labels.to(dev)
 
@@ -81,12 +81,13 @@ def get_random_sample(ds, size, rng=np.random.default_rng()):
 
 
 # ==============
-# MODEL 
+# MODEL
 # ==============
 
-torch.hub.set_dir('C:\\Dev')
+torch.hub.set_dir('C:/Dev/.cache/pytorch')
 
 # additional layers on top of base nn
+
 
 def bn_drop_lin(in_size, out_size):
     return nn.Sequential(
@@ -102,22 +103,17 @@ def bn_drop_lin(in_size, out_size):
 # model class
 
 class Tagger(nn.Module):
-    def __init__(self,
-                 out_classes=len(label_converter),
-                 base_model='efficientnet_b4',  # v2s SOON™
-                 base_out_features=1792):
+    def __init__(self):
         super(Tagger, self).__init__()
 
-        self.out_classes = out_classes
-        self.base_out_features = base_out_features
+        self.out_classes = len(label_converter)
 
-        net = torch.hub.load(
-            'pytorch/vision:v0.12.0',
-            base_model, pretrained=True)
+        backbone = efficientnet_v2_s(weights=EfficientNet_V2_S_Weights.DEFAULT)
+        layers = list(backbone.children())
+        in_features = layers[-1][-1].in_features
+        self.base = nn.Sequential(*layers[:-1]).eval()
 
-        self.base = nn.Sequential(*list(net.children())[:-1])
-        self.classifier = bn_drop_lin(
-            self.base_out_features, self.out_classes)
+        self.classifier = bn_drop_lin(in_features, self.out_classes)
 
     def forward(self, t_in):
 
